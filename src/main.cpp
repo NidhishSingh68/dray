@@ -35,7 +35,7 @@ int main(){
     rcc_periph_clock_enable(RCC_GPIOB);
     rcc_periph_clock_enable(RCC_USART2);
     logger.setup();
-    printf("Hello from the world");
+    printf("Hello from the world\n");
     lcd disp(GPIO::setPortPin(port::PORTA,pin::PIN9),GPIO::setPortPin(port::PORTA,pin::PIN4),GPIO::setPortPin(port::PORTB,pin::PIN5),GPIO::setPortPin(port::PORTA,pin::PIN7),GPIO::setPortPin(port::PORTA,pin::PIN5),GPIO::setPortPin(port::PORTA,pin::PIN10));
     disp.start();
     disp.fill_screen(COLOR::GREEN);

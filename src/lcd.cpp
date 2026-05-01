@@ -65,14 +65,14 @@ void lcd::spi_setup(){
 void lcd::send_command(uint8_t command){
   spi_enable(SPI1);
   spi_send(SPI1,command);
-  while (!(SPI_SR(SPI1) & SPI_SR_TXE)); // Wait for transfer to finish before disabling
+  while (!(SPI_SR(SPI1) & SPI_SR_BSY)); // Wait for transfer to finish before disabling
   spi_disable(SPI1);
 }
 
 void lcd::send_data(uint8_t data){
   spi_enable(SPI1);
   spi_send(SPI1,data);
-  while (!(SPI_SR(SPI1) & SPI_SR_TXE)); // Wait for transfer to finish before disabling
+  while (!(SPI_SR(SPI1) & SPI_SR_BSY)); // Wait for transfer to finish before disabling
   spi_disable(SPI1);
 }
 
@@ -92,13 +92,13 @@ void lcd::init_sequence(){
   send_command(COLMOD);
   TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin]);
   send_data(0x55); //65k colors @16 bits
-  tim.delayMs(10);
+  tim.delayMs(5);
 
   TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_command(MADCTL);
   TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_data(0);
-  tim.delayMs(10);
+  tim.delayMs(5);
 
   TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_command(CASET);
@@ -119,11 +119,11 @@ void lcd::init_sequence(){
   TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   gpio_clear(GPIOB,GPIO5);
   send_command(INVON);
-  tim.delayMs(10);
+  tim.delayMs(5);
 
   TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_command(NORON);
-  tim.delayMs(10);
+  tim.delayMs(5);
 
   TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_command(DISPON);
@@ -161,25 +161,26 @@ void lcd::set_rect(uint16_t ys, uint16_t ye, uint16_t xs, uint16_t xe){
   TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_command(CASET);
   TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
-  send_data(xs >> 8 );
+  send_data(xs>>8);
   send_data(xs & 0xFF);
-  send_data(xe >> 8);
+  send_data(xe>>8);
   send_data(xe & 0xFF);
 
   TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_command(RASET);
   TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
-  send_data(ys >> 8);
+  send_data(ys >> 8 );
   send_data(ys & 0xFF);
-  send_data(ye >> 8);
+  send_data(ye >> 8 );
   send_data(ye & 0xFF);
   
   TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_command(RAMWR);
   TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin]);
 }
-void lcd::fill_screen( COLOR col ){
 
+void lcd::fill_screen( COLOR col ){
+  //printf("Color value is %u",col);
   set_rect(0,TFT_HEIGHT-1,0,TFT_WIDTH-1);
   spi_set_dff_16bit(SPI1);
   spi_enable(SPI1);
@@ -189,6 +190,7 @@ void lcd::fill_screen( COLOR col ){
       spi_send(SPI1,col);
     }
   }
+
   spi_disable(SPI1);
   spi_set_dff_8bit(SPI1);
 }

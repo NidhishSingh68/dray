@@ -4,10 +4,10 @@
 #include <libopencm3/stm32/spi.h>
 
 enum COLOR {
-  RED = 0xF800,
-  GREEN = 0x07E0,
-  BLUE = 0x001F,
-  WHITE = 0xFFFF
+  RED = 0xF800U,
+  GREEN = 0x07E0U,
+  BLUE = 0x001FU,
+  WHITE = 0xFFFFU
 };
 
 #define TRANSMIT_DATA(port,pin) gpio_set(port,pin);

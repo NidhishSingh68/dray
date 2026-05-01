@@ -1,2 +1,4 @@
 ./subprojects/libopencm3/
-./build/
+./build/*
+.cache/*
+.codex
