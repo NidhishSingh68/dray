@@ -16,6 +16,9 @@ enum COLOR {
 #define BL_ON(port,pin) gpio_set(port,pin);
 #define BL_OFF(port,pin) gpio_clear(port,pin);
 
+#define CS_ON(port,pin) gpio_clear(port,pin);
+#define CS_OFF(port,pin) gpio_set(port,pin);
+
 #define TFT_WIDTH 240
 #define TFT_HEIGHT 320
 
@@ -52,6 +55,8 @@ class lcd{
     void send_command(uint8_t command);
     void send_data(uint8_t data);
   private:
+    void select();
+    void deselect();
     void hw_reset();
     void set_rect(uint16_t ys, uint16_t ye, uint16_t xs, uint16_t xe);
     uint16_t RESX,DCX,CSX,SDA,SCL,BL;

@@ -34,12 +34,11 @@ lcd::lcd(  uint16_t RESX, uint16_t NSS, uint16_t DCX, uint16_t MOSI, uint16_t SC
   rcc_periph_clock_enable(RCC_PORT[po]);
   gpio_mode_setup(GPIO_PORT[po],GPIO_MODE_OUTPUT,GPIO_PUPD_NONE,GPIO_PIN[pi]);
   
-  // NSS
+  // NSS: Managed Manually
   po = GPIO::getPort(CSX);
   pi = GPIO::getPin(CSX);
   rcc_periph_clock_enable(RCC_PORT[po]);
-  gpio_mode_setup(GPIO_PORT[po],GPIO_MODE_AF,GPIO_PUPD_NONE,GPIO_PIN[pi]);
-  gpio_set_af(GPIO_PORT[po],GPIO_AF5,GPIO_PIN[pi]);
+  gpio_mode_setup(GPIO_PORT[po],GPIO_MODE_OUTPUT,GPIO_PUPD_NONE,GPIO_PIN[pi]);
 
   // MOSI
   po = GPIO::getPort(SDA);
@@ -59,75 +58,79 @@ lcd::lcd(  uint16_t RESX, uint16_t NSS, uint16_t DCX, uint16_t MOSI, uint16_t SC
 void lcd::spi_setup(){
   rcc_periph_reset_pulse(RST_SPI1);
   rcc_periph_clock_enable(RCC_SPI1);
-  spi_init_master(SPI1,SPI_CR1_BAUDRATE_FPCLK_DIV_16,SPI_CR1_CPOL_CLK_TO_1_WHEN_IDLE,SPI_CR1_CPHA_CLK_TRANSITION_1,SPI_CR1_DFF_8BIT,SPI_CR1_MSBFIRST);
+  spi_init_master(SPI1,SPI_CR1_BAUDRATE_FPCLK_DIV_16,SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,SPI_CR1_CPHA_CLK_TRANSITION_1,SPI_CR1_DFF_8BIT,SPI_CR1_MSBFIRST);
+  spi_enable_software_slave_management(SPI1);
+  spi_set_nss_high(SPI1);
+  spi_enable(SPI1);
 }
 
 void lcd::send_command(uint8_t command){
-  spi_enable(SPI1);
+  port dcxPort = GPIO::getPort(DCX);
+  pin dcxPin = GPIO::getPin(DCX);
+
+  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   spi_send(SPI1,command);
-  while (!(SPI_SR(SPI1) & SPI_SR_BSY)); // Wait for transfer to finish before disabling
-  spi_disable(SPI1);
 }
 
 void lcd::send_data(uint8_t data){
-  spi_enable(SPI1);
+
+  port dcxPort = GPIO::getPort(DCX);
+  pin dcxPin = GPIO::getPin(DCX);
+
+  TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   spi_send(SPI1,data);
-  while (!(SPI_SR(SPI1) & SPI_SR_BSY)); // Wait for transfer to finish before disabling
-  spi_disable(SPI1);
+}
+
+void lcd::select(){
+  
+  port csPort = GPIO::getPort(CSX);
+  pin csPin = GPIO::getPin(CSX);
+
+  CS_ON(GPIO_PORT[csPort],GPIO_PIN[csPin]) 
+}
+
+void lcd::deselect(){
+  while (!(SPI_SR(SPI1) & SPI_SR_BSY));
+  port csPort = GPIO::getPort(CSX);
+  pin csPin = GPIO::getPin(CSX);
+  CS_OFF(GPIO_PORT[csPort],GPIO_PIN[csPin]) 
 }
 
 void lcd::init_sequence(){
-  port dcxPort = GPIO::getPort(DCX);
-  pin dcxPin = GPIO::getPin(DCX);
   
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
+  select();
   send_command(SWRESET);
+  deselect();
   tim.delayMs(120);
 
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
+  select();
   send_command(SLPOUT);
+  deselect();
   tim.delayMs(255);
 
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
+  select();
   send_command(COLMOD);
-  TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin]);
   send_data(0x55); //65k colors @16 bits
-  tim.delayMs(5);
+  deselect();
 
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
+  select();
   send_command(MADCTL);
-  TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_data(0);
-  tim.delayMs(5);
+  deselect();
 
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
-  send_command(CASET);
-  TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
-  send_data(0);
-  send_data(0);
-  send_data(TFT_WIDTH >> 8);
-  send_data(TFT_WIDTH & 0xFF);
-
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
-  send_command(RASET);
-  TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
-  send_data(0);
-  send_data(0);
-  send_data(TFT_HEIGHT >> 8);
-  send_data(TFT_HEIGHT & 0xFF);
-
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
-  gpio_clear(GPIOB,GPIO5);
+  select();
   send_command(INVON);
-  tim.delayMs(5);
+  deselect();
 
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
+  select();
   send_command(NORON);
-  tim.delayMs(5);
+  deselect();
 
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
+  select();
   send_command(DISPON);
-  tim.delayMs(10);
+  deselect();
+  tim.delayMs(100);
+
 }
 
 void lcd::start(){
@@ -142,57 +145,43 @@ void lcd::start(){
 void lcd::hw_reset(){
   port po = GPIO::getPort(RESX);
   pin pi = GPIO::getPin(RESX);
-  tim.setPeriodus(10);
   gpio_set(GPIO_PORT[po],GPIO_PIN[pi]);
-  tim.startTimer();
-  while(tim.shouldLoop){}
-  tim.setPeriodus(40);
+  tim.delayMs(10);
   gpio_clear(GPIO_PORT[po],GPIO_PIN[pi]);
-  tim.startTimer();
-  while(tim.shouldLoop){}
+  tim.delayMs(20);
   gpio_set(GPIO_PORT[po],GPIO_PIN[pi]);
+  tim.delayMs(120);
 }
 
 void lcd::set_rect(uint16_t ys, uint16_t ye, uint16_t xs, uint16_t xe){
-  
-  port dcxPort = GPIO::getPort(DCX);
-  pin dcxPin = GPIO::getPin(DCX);
 
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
+  select();
   send_command(CASET);
-  TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_data(xs>>8);
   send_data(xs & 0xFF);
   send_data(xe>>8);
   send_data(xe & 0xFF);
 
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_command(RASET);
-  TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
   send_data(ys >> 8 );
   send_data(ys & 0xFF);
   send_data(ye >> 8 );
   send_data(ye & 0xFF);
   
-  TRANSMIT_COMMAND(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin])
-  send_command(RAMWR);
-  TRANSMIT_DATA(GPIO_PORT[dcxPort],GPIO_PIN[dcxPin]);
+  deselect();
 }
 
 void lcd::fill_screen( COLOR col ){
-  //printf("Color value is %u",col);
-  set_rect(0,TFT_HEIGHT-1,0,TFT_WIDTH-1);
-  spi_set_dff_16bit(SPI1);
-  spi_enable(SPI1);
 
+  set_rect(0,TFT_HEIGHT-1,0,TFT_WIDTH-1);
+  
+  select();
+  send_command(RAMWR);
   for (int i = 0 ; i < TFT_HEIGHT ; i++){
     for (int j = 0 ; j < TFT_WIDTH ; j++){
-      spi_send(SPI1,col);
+      send_data(col>>8);
+      send_data(col & 0xFF);
     }
   }
-
-  spi_disable(SPI1);
-  spi_set_dff_8bit(SPI1);
+  deselect();  
 }
-
-
