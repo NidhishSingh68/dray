@@ -1,0 +1,10 @@
+[binaries]
+cpp = 'arm-none-eabi-g++'
+c = 'arm-none-eabi-gcc'
+strip = 'arm-none-eabi-strip'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'Cortex-M4'
+endian = 'little'
