@@ -1,39 +1,88 @@
+# DRAY
 
-# STM32F4 C++ Meson Template
-
-This repository is a minimal template for building **C++ firmware for STM32F4 microcontrollers** using **Meson**.
-
-It uses **libopencm3** as a Meson subproject, so the dependency is fetched and built automatically. The main.cpp in src/ is a simple blinky project.
+**DRAY** (Display Rendering librarY) is a C++ library for driving ST7789 display modules. It provides a minimal interface for rendering basic graphics on embedded systems.
 
 ---
 
-## Setup
+## Getting Started
 
-Clone the repository and configure the build using the provided cross file:
+1. Clone the repository:
 
-```sh
-git clone https://github.com/NidhishSingh68/STM32F4-template-for-Cpp-with-meson.git
-cd STM32F4-template-for-Cpp-with-meson
-meson setup build --cross-file cross_file.txt
+   ```bash
+   git clone https://github.com/yourusername/dray.git
+   ```
+
+2. Include the library in your project.
+
+---
+
+## Example Usage
+
+```cpp id="u82kdl"
+#include "lcd.hpp"
+
+int main() {
+    lcd display(RESX, CSX, DCX, SDA, SCL, BL);
+
+    display.start();
+
+    display.set_color(COLOR::RED);
+    display.fill_screen();
+
+    display.set_color(COLOR::WHITE);
+    display.draw_rect(10, 100, 10, 100);
+
+    while (1) {
+    }
+}
 ```
 
-## Compile 
+---
 
-```sh
-meson compile -C build
+## Interface
+
+### Constructor
+
+```cpp id="n1z8qp"
+lcd(uint16_t RESX, uint16_t CSX, uint16_t DCX, uint16_t SDA, uint16_t SCL, uint16_t BL);
 ```
 
-## Flash
+Initializes the display object with the required GPIO pins:
 
-```sh
-meson compile flash -C build/
-```
+* `RESX` – Reset pin
+* `CSX`  – Chip Select pin
+* `DCX`  – Data/Command pin
+* `SDA`  – SPI MOSI pin
+* `SCL`  – SPI Clock pin
+* `BL`   – Backlight control pin
 
-## Optional
+---
 
-Strip the binary to reduce size:
-```sh
-arm-none-eabi-strip ./build/helloWorld
-```
+### Methods
 
+#### `void start();`
 
+Initializes the ST7789 display and prepares it for rendering. Must be called before any drawing operations.
+
+---
+
+#### `void set_color(COLOR col);`
+
+Sets the current drawing color. All subsequent draw operations will use this color.
+
+---
+
+#### `void fill_screen();`
+
+Fills the entire display with the currently selected color.
+
+---
+
+#### `void draw_rect(uint16_t ys, uint16_t ye, uint16_t xs, uint16_t xe);`
+
+Draws a filled rectangle using the current color.
+
+* `ys` – Start Y coordinate
+* `ye` – End Y coordinate
+* `xs` – Start X coordinate
+* `xe` – End X coordinate
