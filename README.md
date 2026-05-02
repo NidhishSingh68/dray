@@ -1,6 +1,6 @@
 # DRAY
 
-**DRAY** (Display Rendering librarY) is a C++ library for driving ST7789 display modules. It provides a minimal interface for rendering basic graphics on embedded systems.
+**DRAY** (Display Rendering librarY) is a C++ library for driving ST7789 display modules. It provides a C++ interface for STM32 devices to render basic graphics to the module, using libopencm3 as its backend. It has been tested on the STM32F446RE.
 
 ---
 
