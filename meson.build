@@ -4,11 +4,9 @@ project('lcd_driver',
         )
 
 src = files('./src/main.cpp',
-            './src/uart.cpp',
             './src/gpio.cpp',
             './src/timer.cpp',
             './src/lcd.cpp',
-            './src/printf.c',
             './src/syscalls.c',
             './src/startup.s'
           )
@@ -36,6 +34,8 @@ stm32f4_args = [
       '-fdata-sections'
 ]
 
+inc = include_directories('./include')
+
 libopencm3_proj = subproject('libopencm3')
 libopencm3_core = libopencm3_proj.get_variable('libopencm3_stm32f4')
 libopencm3_common = libopencm3_proj.get_variable('stm32f4_cm3')
@@ -44,7 +44,9 @@ firmware = executable(
   meson.project_name(),
   src,
   cpp_args: stm32f4_args,
-  dependencies: [ libopencm3_core,libopencm3_common ]
+  dependencies: [ libopencm3_core,libopencm3_common ],
+  include_directories : inc
+
 )
 
 firmware_bin = custom_target(

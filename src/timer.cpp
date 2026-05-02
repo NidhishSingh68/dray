@@ -1,5 +1,4 @@
 #include "timer.hpp"
-#include "printf.h"
 
 timer::timer( TIMER tim ) : tim(tim){}
 

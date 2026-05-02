@@ -1,6 +1,6 @@
-./subprojects/libopencm3/
-./subprojects/.wraplock
-./build/*
+subprojects/libopencm3/
+subprojects/.wraplock
+build/*
 .cache/*
 .codex
 .clangd
