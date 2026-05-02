@@ -1,4 +1,5 @@
 #pragma once 
+
 #include "gpio.hpp"
 #include "timer.hpp"
 #include <libopencm3/stm32/spi.h>
@@ -49,15 +50,23 @@ class lcd{
   public:
     lcd( uint16_t RESX, uint16_t CSX, uint16_t DCX, uint16_t SDA, uint16_t SCL, uint16_t BL );
     void start();
-    void fill_screen( COLOR col );
-    void init_sequence();
-    void spi_setup();
-    void send_command(uint8_t command);
-    void send_data(uint8_t data);
+    void set_color( COLOR col );
+    void fill_screen();
+    void draw_rect( uint16_t ys, uint16_t ye, uint16_t xs, uint16_t xe );
+  
   private:
+    void spi_setup();
+    void hw_reset();
     void select();
     void deselect();
-    void hw_reset();
+    void init_sequence();
+    void send_command(uint8_t command);
+    void send_data(uint8_t data);
     void set_rect(uint16_t ys, uint16_t ye, uint16_t xs, uint16_t xe);
+    void fill_rect(uint16_t ys, uint16_t ye, uint16_t xs, uint16_t xe);
+
+  private:
     uint16_t RESX,DCX,CSX,SDA,SCL,BL;
+    COLOR render_color;
 };
+

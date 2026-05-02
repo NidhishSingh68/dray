@@ -2,24 +2,7 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/timer.h>
-#include "uart.hpp"
-#include "printf.h"
 #include "lcd.hpp"
-
-namespace {
-  uart logger;
-}
-
-extern "C" void usart2_isr(){
-  logger.isr();
-}
-
-extern "C" void _putchar(char c){
-  logger.write(c);
-  if ( (USART_SR(uart_config::usart) & USART_SR_TXE) != 0 ) {
-    usart_enable_tx_interrupt(uart_config::usart);
-  }
-}
 
 // PA10: Backlight
 // PB5: DCX
@@ -33,10 +16,10 @@ int main(){
     rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_GPIOB);
     rcc_periph_clock_enable(RCC_USART2);
-    logger.setup();
     lcd disp(GPIO::setPortPin(port::PORTA,pin::PIN9),GPIO::setPortPin(port::PORTA,pin::PIN4),GPIO::setPortPin(port::PORTB,pin::PIN5),GPIO::setPortPin(port::PORTA,pin::PIN7),GPIO::setPortPin(port::PORTA,pin::PIN5),GPIO::setPortPin(port::PORTA,pin::PIN10));
     disp.start();
-    disp.fill_screen(COLOR::BLUE);
+    disp.set_color(COLOR::BLUE);
+    disp.fill_screen();
 
     while(true){
       __asm__("nop");
