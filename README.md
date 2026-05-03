@@ -102,15 +102,17 @@ Demonstration using **STM32F446RE** with Waveshare 2inch display with the follow
 * **PA10** → Backlight
 * **PB5** → DCX
 * **PA9** → Reset
-**SPI:**
 * **PA4** → NSS
 * **PA5** → SCK
 * **PA7** → MOSI
 
-## Basic Example:
+## Rectangle:
 ![Screenshot](assets/Rectangle.jpg)
 
-## Conway Example:
-<video src="assets/Conway.mp4" width="320" height="240" controls></video>
+## Conway:
+https://github.com/user-attachments/assets/84970edc-4e3b-4d2a-8e5f-924cbb3166a0
+
+
+
 
 
