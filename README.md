@@ -109,7 +109,7 @@ Demonstration using **STM32F446RE** with Waveshare 2inch display with the follow
 ## Rectangle:
 ![Screenshot](assets/Rectangle.jpg)
 
-## Conway:
+## ConwaysGameOfLife:
 https://github.com/user-attachments/assets/84970edc-4e3b-4d2a-8e5f-924cbb3166a0
 
 
