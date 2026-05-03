@@ -8,7 +8,8 @@ enum COLOR {
   RED = 0xF800U,
   GREEN = 0x07E0U,
   BLUE = 0x001FU,
-  WHITE = 0xFFFFU
+  WHITE = 0xFFFFU,
+  BLACK = 0x00000
 };
 
 #define TRANSMIT_DATA(port,pin) gpio_set(port,pin);

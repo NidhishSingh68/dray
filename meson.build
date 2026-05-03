@@ -3,7 +3,15 @@ project('lcd_driver',
         'c'
         )
 
-src = files('./src/main.cpp',
+ScreenFillsrc = files('./examples/Rectangle.cpp',
+            './src/gpio.cpp',
+            './src/timer.cpp',
+            './src/lcd.cpp',
+            './src/syscalls.c',
+            './src/startup.s'
+          )
+
+Conwaysrc = files('./examples/ConwaysGameOfLife.cpp',
             './src/gpio.cpp',
             './src/timer.cpp',
             './src/lcd.cpp',
@@ -40,19 +48,40 @@ libopencm3_proj = subproject('libopencm3')
 libopencm3_core = libopencm3_proj.get_variable('libopencm3_stm32f4')
 libopencm3_common = libopencm3_proj.get_variable('stm32f4_cm3')
 
-firmware = executable(
-  meson.project_name(),
-  src,
+ScreenFillfirmware = executable(
+  'Rectangle',
+  ScreenFillsrc,
   cpp_args: stm32f4_args,
   dependencies: [ libopencm3_core,libopencm3_common ],
   include_directories : inc
-
 )
 
-firmware_bin = custom_target(
-  meson.project_name() + '_bin',
-  input: firmware,
-  output: meson.project_name() + '.bin',
+Conwayfirmware = executable(
+  'Conway',
+  Conwaysrc,
+  cpp_args: stm32f4_args,
+  dependencies: [ libopencm3_core,libopencm3_common ],
+  include_directories : inc
+)
+
+ScreenFillfirmware_bin = custom_target(
+  'ScreenFill' + '_bin',
+  input: ScreenFillfirmware,
+  output: 'ScreenFill' + '.bin',
+  command: [
+    'arm-none-eabi-objcopy',
+    '-O',
+    'binary',
+    '@INPUT@',
+    '@OUTPUT@',
+  ],
+  build_by_default: true,
+)
+
+Conwayfirmware_bin = custom_target(
+    'ConwayGameOfLife' + '_bin',
+  input: Conwayfirmware,
+  output:   'ConwayGameOfLife' + '.bin',
   command: [
     'arm-none-eabi-objcopy',
     '-O',
@@ -64,15 +93,27 @@ firmware_bin = custom_target(
 )
 
 run_target(
-  'flash',
+  'flash_R',
   command: [
     'st-flash',
     '--reset',
     'write',
-    firmware_bin.full_path(),
+    ScreenFillfirmware_bin.full_path(),
     '0x08000000',
   ],
-  depends: firmware_bin,
+  depends: ScreenFillfirmware_bin,
+)
+
+run_target(
+  'flash_C',
+  command: [
+    'st-flash',
+    '--reset',
+    'write',
+    Conwayfirmware_bin.full_path(),
+    '0x08000000',
+  ],
+  depends: Conwayfirmware_bin,
 )
 
 run_target(

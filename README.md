@@ -16,29 +16,6 @@
 
 ---
 
-## Example Usage
-
-```cpp id="u82kdl"
-#include "lcd.hpp"
-
-int main() {
-    lcd display(RESX, CSX, DCX, SDA, SCL, BL);
-
-    display.start();
-
-    display.set_color(COLOR::RED);
-    display.fill_screen();
-
-    display.set_color(COLOR::WHITE);
-    display.draw_rect(10, 100, 10, 100);
-
-    while (1) {
-    }
-}
-```
-
----
-
 ## Interface
 
 ### Constructor
@@ -86,3 +63,54 @@ Draws a filled rectangle using the current color.
 * `ye` – End Y coordinate
 * `xs` – Start X coordinate
 * `xe` – End X coordinate
+
+
+## Compile Examples
+
+1. Navigate to project root and setup build directory
+   ```bash
+   meson setup build --cross_file cross_file.txt
+   ```
+
+2. Compile the example
+   
+   For Rectangle:
+   ```bash
+   meson compile -C build Rectangle
+   ```
+   
+   For ConwaysGameOfLife:
+   ```bash
+   meson compile -C build Conway
+
+3. Flash the binary
+
+   For Rectangle:
+   ```bash
+   meson compile -C build flash_R
+   ```
+   
+   For ConwaysGameOfLife:
+   ```bash
+   meson compile -C build flash_C
+
+---
+## Demonstration
+
+Demonstration using **STM32F446RE** with Waveshare 2inch display with the following connections:
+
+* **PA10** → Backlight
+* **PB5** → DCX
+* **PA9** → Reset
+**SPI:**
+* **PA4** → NSS
+* **PA5** → SCK
+* **PA7** → MOSI
+
+## Basic Example:
+![Screenshot](assets/Rectangle.jpg)
+
+## Conway Example:
+<video src="assets/Conway.mp4" width="320" height="240" controls></video>
+
+
